@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #0d0d1a;
+            background-color: #101024;
             margin: 0;
             padding: 0;
             display: flex;
@@ -16,7 +16,7 @@
             height: 100vh;
         }
         .container {
-            background-color: white;
+            background-color: rgb(255, 255, 255);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -64,7 +64,7 @@
 <body>
     
     <div class="container">
-        <h1>BMI Calculator</h1>
+        <h1>BMI Calculator and Daily Calorie Requirement with Feedback</h1>
         <form method="post">
             <input type="number" name="weight" placeholder="Weight (kg)" required>
             <input type="number" name="height" placeholder="Height (cm)" required>
@@ -95,8 +95,8 @@
         <div class="exercise-plan">
             <h3>Suggested Exercises:</h3>
             <ul>
-                {% for exercise in exercises %}
-                <li>{{ exercise }}</li>
+                {% for day in exercises %}
+                <li><strong>{{ day.day }}:</strong> {{ day.routine }}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -104,7 +104,7 @@
             <h3>Suggested Meal Plan:</h3>
             <ul>
                 {% for meal in meals %}
-                <li>{{ meal.icon }} {{ meal.meal }}</li>
+                <li>{{ meal.meal }} {{ meal.icon }}</li>
                 {% endfor %}
             </ul>
         </div>
