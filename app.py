@@ -93,4 +93,4 @@ def bmi_bmr_calculator():
     return render_template('index.html', bmi=bmi, calories=calories, feedback=feedback, exercises=exercises, meals=meals)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
