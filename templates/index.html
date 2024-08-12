@@ -8,12 +8,13 @@
         body {
             font-family: Arial, 'Times New Roman', Times, serif;
             background-color: #2a2a58;
+            box-shadow: #0563c7;
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 120vh;
+            height: 150dvh;
         }
         .container {
             background-color: rgb(255, 255, 255);
@@ -86,8 +87,8 @@
             <p>Feedback: <strong>{{ feedback }}</strong></p>
         </div>
         <div class="suggestion-plan">
-            <h3>Suggestions:</h3>
-            <p>{{ advice }}</p>
+            <h2>Suggestions:</h2>
+            <h3>{{ advice }}</h3>
         </div>        
         {% endif %}
     </div>

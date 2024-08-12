@@ -9,14 +9,54 @@ app = Flask(__name__)
 gemini = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
 
 template = """
-You are a fitness specialist doctor. You are asked from a patient who is seeking advice on their health and fitness goals. Analyze the following information and suggest exercises with exercise routine and meal plan including food items.:
+You are a fitness specialist doctor. You are asked by a patient who is seeking advice on their health and fitness goals. Analyze the following information and suggest exercises with an exercise routine and meal plan, including food items.
+
 Age: {age}
 Gender: {gender}
 Weight in kg: {weight}
 Height in cm: {height}
-Daily Calorie Requirement: {daily_calories}
 Activity Level: {activity_level}
+Daily Calorie Requirement: {daily_calories}
+
+Provide your suggestions in a clear and structured format.
+
+Format the response like this:
+
+Health and Fitness Plan
+
+Goals:
+- Goal 1: Description
+- Goal 2: Description
+
+Exercise Routine:
+- Frequency: (Number of days per week)
+- Duration: (Minutes per session)
+- Intensity: (Description)
+
+Sample Workout Plan:
+- Day 1: Cardio and Strength
+  - Warm-up: Description
+  - Cardio: Description
+  - Strength Training:
+    - Exercise 1: Details
+    - Exercise 2: Details
+
+- Day 2: Rest or Active Recovery
+  - Active Recovery: Description
+
+Meal Plan:
+- Breakfast: (Suggestions)
+- Lunch: (Suggestions)
+- Dinner: (Suggestions)
+- Snacks: (Suggestions)
+
+Important Considerations:
+- Consideration 1: Description
+- Consideration 2: Description
+
+Make sure the response is easy to read and well-organized.
 """
+
 llm_chain = LLMChain(prompt=PromptTemplate(template=template), llm=gemini)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -53,15 +93,11 @@ def bmi_bmr_calculator():
         }
         calories = round(bmr * activity_multiplier[daily_calories])
 
-        # Determine user goal based on BMI
         if bmi < 18.5:
-            goal = "muscle_gain"
             feedback = "You are underweight. Focus on muscle gain."
         elif 18.5 <= bmi < 24.9:
-            goal = "maintenance"
             feedback = "You have a normal weight. Maintain your current routine."
         else:
-            goal = "weight_loss"
             feedback = "You are overweight. Focus on weight loss."
 
         advice = llm_chain.run({
@@ -72,7 +108,7 @@ def bmi_bmr_calculator():
             "daily_calories": calories,
             "activity_level": daily_calories
         })
-
+        
     return render_template('index.html', bmi=bmi, calories=calories, feedback=feedback, advice=advice)
 
 if __name__ == '__main__':
