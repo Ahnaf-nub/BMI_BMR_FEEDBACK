@@ -13,7 +13,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 120vh;
         }
         .container {
             background-color: rgb(255, 255, 255);
@@ -48,16 +48,9 @@
         .result {
             margin-top: 20px;
         }
-        .meal-plan, .exercise-plan {
+        .suggestion-plan {
             text-align: center;
             margin-top: 20px;
-        }
-        .meal-plan ul, .exercise-plan ul {
-            list-style: none;
-            padding: 0;
-        }
-        .meal-plan li, .exercise-plan li {
-            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -92,22 +85,10 @@
             <p>Your Daily Calorie Requirement is: <strong>{{ calories }}</strong> Cal</p>
             <p>Feedback: <strong>{{ feedback }}</strong></p>
         </div>
-        <div class="exercise-plan">
-            <h3>Suggested Exercises:</h3>
-            <ul>
-                {% for day in exercises %}
-                <li><strong>{{ day.day }}:</strong> {{ day.routine }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="meal-plan">
-            <h3>Suggested Meal Plan:</h3>
-            <ul>
-                {% for meal in meals %}
-                <li>{{ meal.meal }} {{ meal.icon }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+        <div class="suggestion-plan">
+            <h3>Suggestions:</h3>
+            <p>{{ advice }}</p>
+        </div>        
         {% endif %}
     </div>
 </body>

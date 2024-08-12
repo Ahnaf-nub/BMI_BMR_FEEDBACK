@@ -1,14 +1,30 @@
 from flask import Flask, render_template, request
+from langchain import PromptTemplate, LLMChain
+from langchain_google_genai import ChatGoogleGenerativeAI
+from dotenv import load_dotenv
+
+load_dotenv()
 app = Flask(__name__)
 
+gemini = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+
+template = """
+You are a fitness specialist doctor. You are asked from a patient who is seeking advice on their health and fitness goals. Analyze the following information and suggest exercises with exercise routine and meal plan including food items.:
+Age: {age}
+Gender: {gender}
+Weight in kg: {weight}
+Height in cm: {height}
+Daily Calorie Requirement: {daily_calories}
+Activity Level: {activity_level}
+"""
+llm_chain = LLMChain(prompt=PromptTemplate(template=template), llm=gemini)
 
 @app.route('/', methods=['GET', 'POST'])
 def bmi_bmr_calculator():
     bmi = ''
     calories = ''
     feedback = ''
-    exercises = []
-    meals = []
+    advice = ''
 
     if request.method == 'POST':
         weight = float(request.form['weight'])
@@ -41,56 +57,23 @@ def bmi_bmr_calculator():
         if bmi < 18.5:
             goal = "muscle_gain"
             feedback = "You are underweight. Focus on muscle gain."
-            exercises = [
-                {"day": "Monday", "routine": "🏋️ Weight Lifting - Upper Body"},
-                {"day": "Tuesday", "routine": "🏋️‍♂️ Resistance Training - Lower Body"},
-                {"day": "Wednesday", "routine": "🏋️‍♀️ Squats and Lunges"},
-                {"day": "Thursday", "routine": "🤸 Push-ups and Pull-ups"},
-                {"day": "Friday", "routine": "💪 Core Strength Training"},
-                {"day": "Saturday", "routine": "🧘‍♂️ Yoga and Stretching"},
-                {"day": "Sunday", "routine": "🛌 Rest Day"}
-            ]
-            meals = [
-                {"meal": "Egg curry with rice", "icon": "🥚"},
-                {"meal": "Chicken breast with vegetables", "icon": "🍗"},
-                {"meal": "Fish curry with lentils", "icon": "🐟"}
-            ]
         elif 18.5 <= bmi < 24.9:
             goal = "maintenance"
             feedback = "You have a normal weight. Maintain your current routine."
-            exercises = [
-                {"day": "Monday", "routine": "🧘 Yoga"},
-                {"day": "Tuesday", "routine": "🧘‍♀️ Pilates"},
-                {"day": "Wednesday", "routine": "🥾 Hiking or Brisk Walking"},
-                {"day": "Thursday", "routine": "💃 Dancing or Zumba"},
-                {"day": "Friday", "routine": "🏃 Light Jogging"},
-                {"day": "Saturday", "routine": "🏊 Swimming"},
-                {"day": "Sunday", "routine": "🛌 Rest Day"}
-            ]
-            meals = [
-                {"meal": "Vegetable curry with rice", "icon": "🥗"},
-                {"meal": "Grilled fish with salad", "icon": "🐠🥗"},
-                {"meal": "Daal (lentils) with roti", "icon": "🥙"}
-            ]
         else:
             goal = "weight_loss"
             feedback = "You are overweight. Focus on weight loss."
-            exercises = [
-                {"day": "Monday", "routine": "🚶 Walking or Light Jogging"},
-                {"day": "Tuesday", "routine": "🚴 Cycling"},
-                {"day": "Wednesday", "routine": "🏊 Swimming"},
-                {"day": "Thursday", "routine": "🤸 Aerobics"},
-                {"day": "Friday", "routine": "🔥 High-Intensity Interval Training (HIIT)"},
-                {"day": "Saturday", "routine": "💃 Dancing or Zumba"},
-                {"day": "Sunday", "routine": "🛌 Rest Day"}
-            ]
-            meals = [
-                {"meal": "Fruit salad", "icon": "🍉"},
-                {"meal": "Grilled chicken salad", "icon": "🥗"},
-                {"meal": "Boiled vegetables with fish", "icon": "🥦🐠"}
-            ]
 
-    return render_template('index.html', bmi=bmi, calories=calories, feedback=feedback, exercises=exercises, meals=meals)
+        advice = llm_chain.run({
+            "age": age,
+            "gender": gender,
+            "weight": weight,
+            "height": height,
+            "daily_calories": calories,
+            "activity_level": daily_calories
+        })
+
+    return render_template('index.html', bmi=bmi, calories=calories, feedback=feedback, advice=advice)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True)
