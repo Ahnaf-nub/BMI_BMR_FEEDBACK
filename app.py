@@ -1,11 +1,15 @@
-from flask import Flask, render_template, request
+from fastapi import FastAPI, Form, HTTPException
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.requests import Request
 from langchain import PromptTemplate, LLMChain
 from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
 
 load_dotenv()
-app = Flask(__name__)
+app = FastAPI()
 
+templates = Jinja2Templates(directory="templates")
 gemini = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
 
 template = """
@@ -59,29 +63,35 @@ Make sure the response is easy to read and well-organized.
 
 llm_chain = LLMChain(prompt=PromptTemplate(template=template), llm=gemini)
 
-@app.route('/', methods=['GET', 'POST'])
-def bmi_bmr_calculator():
-    bmi = ''
-    calories = ''
-    feedback = ''
-    advice = ''
+def removeEmpty(paragraph):
+    lines = paragraph.split('\n')
+    non_empty_lines = [line for line in lines if line.strip() != '']
+    cleaned_paragraph = '\n'.join(non_empty_lines)
+    return cleaned_paragraph
 
-    if request.method == 'POST':
-        weight = float(request.form['weight'])
-        height = float(request.form['height'])
-        meter_height = height / 100  # Convert height to meters
-        age = int(request.form['age'])
-        gender = request.form['gender']
-        daily_calories = request.form['daily_calories']
+
+@app.get("/", response_class=HTMLResponse)
+async def bmi_bmr_calculator_form(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request, "bmi": "", "calories": "", "feedback": "", "advice": ""})
+
+@app.post("/", response_class=HTMLResponse)
+async def bmi_bmr_calculator(
+    request: Request,
+    weight: float = Form(...),
+    height: float = Form(...),
+    age: int = Form(...),
+    gender: str = Form(...),
+    daily_calories: str = Form(...)
+):
+    try:
+        meter_height = height / 100
 
         # Calculate BMI
         bmi = round(weight / (meter_height * meter_height), 2)
 
         # Calculate BMR based on gender
-        if gender == 'male':
-            bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
-        else:
-            bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+        if gender == 'male': bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+        else: bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
 
         # Adjust BMR based on activity level
         activity_multiplier = {
@@ -93,12 +103,9 @@ def bmi_bmr_calculator():
         }
         calories = round(bmr * activity_multiplier[daily_calories])
 
-        if bmi < 18.5:
-            feedback = "You are underweight. Focus on muscle gain."
-        elif 18.5 <= bmi < 24.9:
-            feedback = "You have a normal weight. Maintain your current routine."
-        else:
-            feedback = "You are overweight. Focus on weight loss."
+        if bmi < 18.5: feedback = "You are underweight. Focus on muscle gain."
+        elif 18.5 <= bmi < 24.9: feedback = "You have a normal weight. Maintain your current routine."
+        else: feedback = "You are overweight. Focus on weight loss."
 
         advice = llm_chain.run({
             "age": age,
@@ -108,8 +115,12 @@ def bmi_bmr_calculator():
             "daily_calories": calories,
             "activity_level": daily_calories
         })
-        
-    return render_template('index.html', bmi=bmi, calories=calories, feedback=feedback, advice=advice)
+        advice = removeEmpty(advice)
+
+        return templates.TemplateResponse("index.html", {"request": request, "bmi": bmi, "calories": calories, "feedback": feedback, "advice": advice})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
