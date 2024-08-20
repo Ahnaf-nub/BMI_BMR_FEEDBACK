@@ -5,8 +5,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.requests import Request
 from langchain import PromptTemplate, LLMChain
 from langchain_google_genai import ChatGoogleGenerativeAI
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
 load_dotenv()
 app = FastAPI()
