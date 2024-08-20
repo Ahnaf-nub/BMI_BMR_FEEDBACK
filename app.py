@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Form, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from fastapi.requests import Request
 from langchain import PromptTemplate, LLMChain
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -9,6 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 gemini = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
 
@@ -63,13 +65,6 @@ Make sure the response is easy to read and well-organized.
 
 llm_chain = LLMChain(prompt=PromptTemplate(template=template), llm=gemini)
 
-def removeEmpty(paragraph):
-    lines = paragraph.split('\n')
-    non_empty_lines = [line for line in lines if line.strip() != '']
-    cleaned_paragraph = '\n'.join(non_empty_lines)
-    return cleaned_paragraph
-
-
 @app.get("/", response_class=HTMLResponse)
 async def bmi_bmr_calculator_form(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "bmi": "", "calories": "", "feedback": "", "advice": ""})
@@ -87,7 +82,7 @@ async def bmi_bmr_calculator(
         meter_height = height / 100
 
         # Calculate BMI
-        bmi = round(weight / (meter_height * meter_height), 2)
+        bmi = weight / (meter_height * meter_height)
 
         # Calculate BMR based on gender
         if gender == 'male': bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
@@ -115,9 +110,14 @@ async def bmi_bmr_calculator(
             "daily_calories": calories,
             "activity_level": daily_calories
         })
-        advice = removeEmpty(advice)
-
-        return templates.TemplateResponse("index.html", {"request": request, "bmi": bmi, "calories": calories, "feedback": feedback, "advice": advice})
+        advice = advice.replace("**", "").replace("##", "")
+        return templates.TemplateResponse("index.html", {
+            "request": request,
+            "bmi": round(bmi, 2),
+            "calories": calories,
+            "feedback": feedback,
+            "advice": advice
+        })
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
