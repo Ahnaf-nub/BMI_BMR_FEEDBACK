@@ -6,9 +6,11 @@ from fastapi.requests import Request
 from langchain import PromptTemplate, LLMChain
 from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 app = FastAPI()
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
