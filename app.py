@@ -15,7 +15,7 @@ GOOGLE_API_KEY = os.getenv('API_KEY')
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
-gemini = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+gemini = ChatGoogleGenerativeAI(model="gemini-1.5-flash", api_key=GOOGLE_API_KEY)
 
 template = """
 You are a fitness specialist doctor. You are asked by a patient who is seeking advice on their health and fitness goals. Analyze the following information and suggest exercises with an exercise routine and meal plan, including food items.
