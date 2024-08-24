@@ -17,7 +17,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 gemini = ChatGoogleGenerativeAI(model="gemini-1.5-flash", api_key=GOOGLE_API_KEY)
 
-template = """
+prompt_template = """
 You are a fitness specialist doctor. You are asked by a patient who is seeking advice on their health and fitness goals. Analyze the following information and suggest exercises with an exercise routine and meal plan, including food items.
 
 Age: {age}
@@ -66,7 +66,10 @@ Important Considerations:
 Make sure the response is easy to read and well-organized.
 """
 
-llm_chain = LLMChain(prompt=PromptTemplate(template=template), llm=gemini)
+llm_chain = LLMChain(
+    prompt=PromptTemplate(template=prompt_template),
+    llm=gemini
+)
 
 @app.get("/", response_class=HTMLResponse)
 async def bmi_bmr_calculator_form(request: Request):
