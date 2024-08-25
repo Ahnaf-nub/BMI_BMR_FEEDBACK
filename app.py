@@ -14,7 +14,8 @@ load_dotenv()
 app = FastAPI()
 
 # Configure the Google Generative AI API
-genai.configure(api_key=os.getenv('API_KEY')) 
+GOOGLE_API_KEY = os.getenv('API_KEY')
+genai.configure(api_key=GOOGLE_API_KEY) 
 gemini = genai.GenerativeModel('gemini-1.5-flash')
 
 # Mount static files and set up templates
