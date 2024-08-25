@@ -118,8 +118,7 @@ async def bmi_bmr_calculator(
             feedback = "You are overweight. Focus on weight loss."
 
         # Generate advice using the Generative AI model
-        advice = gemini.generate_content(
-            prompt=template.format(
+        advice = gemini.generate_content(template.format(
                 age=age,
                 gender=gender,
                 weight=weight,
@@ -128,10 +127,9 @@ async def bmi_bmr_calculator(
                 activity_level=daily_calories
             )
         )
-        
+        advice = advice.text
         # Extract the text content from the response object
-        advice_text = advice.generations[0].text.replace("**", "").replace("##", "")
-
+        advice_text = advice.replace("**", "").replace("##", "")
         # Render the response in the template
         return templates.TemplateResponse("index.html", {
             "request": request,
