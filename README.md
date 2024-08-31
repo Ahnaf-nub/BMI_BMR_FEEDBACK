@@ -4,6 +4,8 @@ This BMI and Daily Calorie Requirement Calculator is a fastapi based web applica
 
 Try it out at: https://bmibmr.vercel.app
 
+![image](https://github.com/user-attachments/assets/389d13e7-5c62-40ad-80b0-9e523ca3e51f)
+
 ## For running Locally
 
 1. **Clone the Repository**:
